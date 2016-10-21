@@ -5,38 +5,55 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.scijava.command.Command;
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvStackSource;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.io.FileInfo;
-import ij.plugin.PlugIn;
-import net.imagej.patcher.LegacyEnvironment;
+import net.imagej.ImageJ;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.ARGBType;
 
-public class MhdPlayground implements PlugIn
+@Plugin(type = Command.class, headless = true, menuPath = "Plugins>MhdPlayground")
+public class MhdPlayground implements Command
 {
 	public static void main( final String[] args ) throws ClassNotFoundException
 	{
-		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
+		// Launch ImageJ as usual.
+		final ImageJ ij = net.imagej.Main.launch(args);
 
-		System.setProperty( "ij.dir", "/Users/Pietzsch/Desktop/Fiji.app" );
-		System.setProperty( "fiji.dir", "/Users/Pietzsch/Desktop/Fiji.app" );
-		System.setProperty( "imagej.dir", "/Users/Pietzsch/Desktop/Fiji.app" );
-		System.setProperty( "ij1.plugin.dirs", "/Users/Pietzsch/Desktop/Fiji.app/plugins" );
+		final String fnInput = "/Users/Pietzsch/Desktop/data/Christopher/Results_prototype/C2-95A.mhd";
 
-		final LegacyEnvironment ij1 = new LegacyEnvironment( null, false );
-		ij1.addPluginClasspath( Thread.currentThread().getContextClassLoader() );
-		ij1.main();
-		ij1.runPlugIn( "bdv.dzne.MhdPlayground", null );
+		IJ.open( fnInput );
+		IJ.open( "/Users/Pietzsch/Desktop/data/Christopher/Christopher Atlas/canon_T1_r(2).mha" );
+
+		ij.command().run(MhdPlayground.class, true);
+
+//		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
+//
+//		System.setProperty( "ij.dir", "/Users/Pietzsch/Desktop/Fiji.app" );
+//		System.setProperty( "fiji.dir", "/Users/Pietzsch/Desktop/Fiji.app" );
+//		System.setProperty( "imagej.dir", "/Users/Pietzsch/Desktop/Fiji.app" );
+//		System.setProperty( "ij1.plugin.dirs", "/Users/Pietzsch/Desktop/Fiji.app/plugins" );
+//
+//		final LegacyEnvironment ij1 = new LegacyEnvironment( null, false );
+//		ij1.addPluginClasspath( Thread.currentThread().getContextClassLoader() );
+//		ij1.main();
+//		ij1.runPlugIn( "bdv.dzne.MhdPlayground", null );
 	}
 
+	@Parameter(label = "What is your name?")
+	ImagePlus imp = null;
+
 	@Override
-	public void run( final String arg )
+	public void run()
 	{
 		try
 		{
@@ -88,12 +105,6 @@ public class MhdPlayground implements PlugIn
 
 	public void doit() throws IOException
 	{
-		final String fnInput = "/Users/Pietzsch/Desktop/data/Christopher/Results_prototype/C2-95A.mhd";
-
-		IJ.open( fnInput );
-
-		final ImagePlus imp = IJ.getImage();
-
 		input = new ImpInfo( imp );
 		input.loadHeader();
 		input.showInBdv( null );

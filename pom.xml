@@ -39,10 +39,14 @@
 			<artifactId>imglib2-ij</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej</artifactId>
+		</dependency>
+<!-- 		<dependency>
 		    <groupId>sc.fiji</groupId>
 		    <artifactId>fiji-lib</artifactId>
 		</dependency>
-
+ -->
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
