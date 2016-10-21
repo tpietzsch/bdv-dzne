@@ -9,6 +9,7 @@ import bdv.dzne.util.FileChooser.SelectionMode;
 import bdv.dzne.util.XmlFileFilter;
 import bdv.export.ProgressWriter;
 import bdv.export.ProgressWriterConsole;
+import bdv.viewer.ViewerOptions;
 import ij.ImageJ;
 import ij.plugin.PlugIn;
 
@@ -32,7 +33,7 @@ public class DznePlugIn implements PlugIn
 			{
 				lastDatasetPath = file.getAbsolutePath();
 				final ProgressWriter writer = new ProgressWriterConsole(); // TODO ProgressWriterIJ(), but messes with dependencies for project setup...
-				BigDataViewer.view( file.getAbsolutePath(), writer );
+				BigDataViewer.open( file.getAbsolutePath(), file.getName(), writer, ViewerOptions.options() );
 			}
 			catch ( final Exception e )
 			{
