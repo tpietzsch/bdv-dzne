@@ -5,10 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.scijava.ui.behaviour.io.InputTriggerConfig;
-import org.scijava.ui.behaviour.util.Actions;
-
-import bdv.tools.transformation.TransformedSource;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvStackSource;
@@ -88,59 +84,20 @@ public class MhdPlayground implements PlugIn
 		}
 	}
 
-	private Bdv bdv;
-
-	private ImpInfo atlas;
-
 	private ImpInfo input;
-
-	private void saveManualRegistration()
-	{
-		System.out.println( "save manual registration" );
-
-		final AffineTransform3D transform = getManualTransform( input.bdvSource ).preConcatenate( getManualTransform( atlas.bdvSource ).inverse() );
-		input.header.preConcatenateTransform( transform );
-		input.header.printModified();
-		System.out.println();
-		System.out.println();
-		System.out.println();
-		System.out.println();
-	}
-
-	private AffineTransform3D getManualTransform( final BdvStackSource< ? > stackSource )
-	{
-		final TransformedSource< ? > source = ( TransformedSource< ? > ) stackSource.getSources().get( 0 ).getSpimSource();
-		final AffineTransform3D manual = new AffineTransform3D();
-		final AffineTransform3D fixedTransform = new AffineTransform3D();
-		source.getIncrementalTransform( manual );
-		source.getFixedTransform( fixedTransform );
-		manual.concatenate( fixedTransform );
-		return manual;
-	}
 
 	public void doit() throws IOException
 	{
-//		final String fnAtlas = "/Users/Pietzsch/Desktop/data/Christopher/Christopher Atlas/canon_T1_r(2).mha";
-//		final String fnInput = "/Users/Pietzsch/Desktop/data/Christopher/C2-Fused-1_turned_mirrored.mhd";
-		final String fnAtlas = "/Users/Pietzsch/Desktop/data/Christopher/Results_prototype/atlas.mhd";
 		final String fnInput = "/Users/Pietzsch/Desktop/data/Christopher/Results_prototype/C2-95A.mhd";
 
-		IJ.open( fnAtlas );
-		atlas = new ImpInfo( IJ.getImage() );
-		atlas.loadHeader();
-		atlas.showInBdv( null );
-		atlas.bdvSource.setColor( new ARGBType( 0x0000ff00 ) );
-		bdv = atlas.bdvSource;
-
 		IJ.open( fnInput );
-		input = new ImpInfo( IJ.getImage() );
+
+		final ImagePlus imp = IJ.getImage();
+
+		input = new ImpInfo( imp );
 		input.loadHeader();
-		input.showInBdv( bdv );
+		input.showInBdv( null );
 		input.bdvSource.setColor( new ARGBType( 0x00ff00ff ) );
 		input.bdvSource.setCurrent();
-
-		final Actions actions = new Actions( new InputTriggerConfig() );
-		actions.install( bdv.getBdvHandle().getKeybindings(), "dzne" );
-		actions.runnableAction( this::saveManualRegistration, "save manual registration", "meta S" );
 	}
 }
