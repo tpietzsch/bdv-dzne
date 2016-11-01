@@ -30,6 +30,8 @@ public class PartiallyParsedMhd
 
 	final double[] elementSpacing;
 
+	final AffineTransform3D preConcatenatedTransform;
+
 	public PartiallyParsedMhd( final BufferedReader in ) throws IOException, ParseException
 	{
 		lines = new ArrayList<>();
@@ -42,6 +44,7 @@ public class PartiallyParsedMhd
 		centerOfRotation = new double[ 3 ];
 		found_ElementSpacing = false;
 		elementSpacing = new double[ 3 ];
+		preConcatenatedTransform = new AffineTransform3D();
 		while ( true )
 		{
 			final String line = in.readLine();
@@ -141,24 +144,28 @@ public class PartiallyParsedMhd
 		sourceTransform.preConcatenate( calibratedToWorld );
 	}
 
-	public void preConcatenateTransform( final AffineTransform3D transform )
+	public void setPreConcatenatedTransform( final AffineTransform3D transform )
+	{
+		preConcatenatedTransform.set( transform );
+	}
+
+	public void printModified()
 	{
 		final AffineTransform3D calibratedToWorld = new AffineTransform3D();
 		calibratedToWorld.set(
 				transformMatrix[ 0 ], transformMatrix[ 1 ], transformMatrix[ 2 ], offset[ 0 ],
 				transformMatrix[ 3 ], transformMatrix[ 4 ], transformMatrix[ 5 ], offset[ 1 ],
 				transformMatrix[ 6 ], transformMatrix[ 7 ], transformMatrix[ 8 ], offset[ 2 ] );
-		calibratedToWorld.preConcatenate( transform );
+		calibratedToWorld.preConcatenate( preConcatenatedTransform );
+		final double[] modifiedTransformMatrix = new double[ 9 ];
+		final double[] modifiedOffset = new double[ 3 ];
 		for ( int r = 0; r < 3; ++r )
 		{
 			for ( int c = 0; c < 3; ++c )
-				transformMatrix[ 3 * r + c ] = calibratedToWorld.get( r, c );
-			offset[ r ] = calibratedToWorld.get( r, 3 );
+				modifiedTransformMatrix[ 3 * r + c ] = calibratedToWorld.get( r, c );
+			modifiedOffset[ r ] = calibratedToWorld.get( r, 3 );
 		}
-	}
 
-	public void printModified()
-	{
 		final PrintStream out = System.out;
 		for ( final String line : lines )
 		{
@@ -167,7 +174,7 @@ public class PartiallyParsedMhd
 				final StringBuffer sb = new StringBuffer( "TransformMatrix = " );
 				for ( int i = 0; i < 9; ++i )
 				{
-					sb.append( transformMatrix[ i ] );
+					sb.append( String.format( "%.5f", modifiedTransformMatrix[ i ] ) );
 					if ( i < 8 )
 						sb.append( " " );
 				}
@@ -178,7 +185,7 @@ public class PartiallyParsedMhd
 				final StringBuffer sb = new StringBuffer( "Offset = " );
 				for ( int i = 0; i < 3; ++i )
 				{
-					sb.append( offset[ i ] );
+					sb.append( String.format( "%.5f", modifiedOffset[ i ] ) );
 					if ( i < 2 )
 						sb.append( " " );
 				}
